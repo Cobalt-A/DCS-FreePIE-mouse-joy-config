@@ -1,4 +1,4 @@
-# Cкрипт для FreePIE (програмируемый имулятор ввода)
+# Cкрипт для [FreePIE](https://github.com/AndersMalmgren/FreePIE/releases) (програмируемый имулятор ввода)
 
 Скрипт использует виртуальный джостик [vJoy](https://sourceforge.net/projects/vjoystick/) и [Opentrack](https://github.com/opentrack/opentrack/releases) для обзора
 
