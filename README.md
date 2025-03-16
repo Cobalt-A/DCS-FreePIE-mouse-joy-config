@@ -9,7 +9,7 @@
 
 Нужно выставить Joystick input и выбрать opentrack_config.ini из репозитория
 
-![Настройка OpenTrack](./images/Opentrack.png.png)
+![Настройка OpenTrack](./images/Opentrack.png)
 
 # Запуск скрипта в FreePIE
 
