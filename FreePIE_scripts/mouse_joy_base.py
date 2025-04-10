@@ -7,7 +7,7 @@
 # - Оси RX,RY,Z (vJoy[0]) - оси для обзора
 # - Ось (vJoy[0]) (rz) - ось рысканья
 # =====================================================
-# --- Кнопки виртуального джостика vJoy[0] повторяют кнопки мыши по дефолту кнопок 5 (могут быть переназначены по желанию) ---
+# --- Кнопки виртуального джойстика vJoy[0] повторяют кнопки мыши по дефолту кнопок 5 (могут быть переназначены по желанию) ---
 # =====================================================
 # --- Клавиши управления (могут быть переназначены по желанию) ---
 # - TAB - принудительное выключение мышеджоя (его оси переходят на обзор)
@@ -20,14 +20,12 @@
 # Начало скрипта управления
 from ctypes import windll, Structure, c_ulong, byref
 
-
 # Инициализация констант и стартовых значений,
-# все не вычисляемые переменые должны задаватся в этом блоке
+# все не вычисляемые переемные должны задаваться в этом блоке
 if starting:
 	class POINT(Structure):
 		_fields_ = [("x", c_ulong), ("y", c_ulong)]
-
-	PT = POINT()
+	CURSOR = POINT()
 	MAX_MOUSE_JOY_VALUE = 32768
 	MAX_VIEW_VALUE = 13000
 	VIEW_SENS = 1
@@ -35,14 +33,14 @@ if starting:
 	Z_SENS = 11
 	SCREEN_X = windll.user32.GetSystemMetrics(0)
 	SCREEN_Y = windll.user32.GetSystemMetrics(1)
-	QUALIFER = 100  # уточнитель задает точность измерений до сотых, используется, для сохранения дробной части в умножителе
 
-	# Внимание - не стоит задавать близкие значения SCALE_V и SCALE_R, так как это приведет к взаимовлиянию настроек. Одно из значений в паре пусть будет 100.
-	SCALE_V = 100 # на какой угол в % отклоняется реальный джойстик, если меньше 100, то джойстик не наклоняется до конца
-	SCALE_R = 100 # % масштабирования осей реального джойстика на экран, если меньше 100% то джойстик будет отклонятся до упора раньше 
+	# Размеры мышеджоя
+	MOUSE_JOY_WIDTH = SCREEN_X
+	MOUSE_JOY_HEIGHT = SCREEN_Y
 
-	MULTIPLER_X = QUALIFER * MAX_MOUSE_JOY_VALUE / SCREEN_X # для разрешения монитора умножитель определяет, насколько нужно увеличить значение положения курсора, чтобы джойстик корректно отклонялся от центра экрана
-	MULTIPLER_Y = QUALIFER * MAX_MOUSE_JOY_VALUE / SCREEN_Y
+	# Формула множителя для перевода координат курсора в значения мышеджоя
+	MULTIPLE_X = MAX_MOUSE_JOY_VALUE / MOUSE_JOY_WIDTH
+	MULTIPLE_Y = MAX_MOUSE_JOY_VALUE / MOUSE_JOY_HEIGHT
 
 	vJoy[0].x = 0
 	vJoy[0].y = 0
@@ -58,20 +56,20 @@ if starting:
 
 	mouse_vjoy_is_enabled = False
 	mouse_vjoy_toggle_key = Key.C
-	mouse_vjoy_is_forced_unenabled = True
+	mouse_vjoy_is_forced_unenable = True
 	mouse_vJoy_unenable_forced_key = Key.Tab
 	is_keyboard_joy_x_enabled = False
 	is_keyboard_joy_y_enabled = False
 
 	
-cursor_to_center_key = mouse.middleButton
+is_cursor_to_center_key_pressed = mouse.middleButton
 
 # Кнопка обзора
-if keyboard.getKeyDown(mouse_vjoy_toggle_key) and mouse_vjoy_is_enabled and not mouse_vjoy_is_forced_unenabled:
+if keyboard.getKeyDown(mouse_vjoy_toggle_key) and mouse_vjoy_is_enabled and not mouse_vjoy_is_forced_unenable:
 	mouse_vjoy_is_enabled = False
 
 # Включение мышеджоя
-if not keyboard.getKeyDown(mouse_vjoy_toggle_key) and not mouse_vjoy_is_enabled and not mouse_vjoy_is_forced_unenabled:
+if not keyboard.getKeyDown(mouse_vjoy_toggle_key) and not mouse_vjoy_is_enabled and not mouse_vjoy_is_forced_unenable:
 	mouse_vjoy_is_enabled = True
 	vJoy[0].rx = 0
 	vJoy[0].ry = 1000
@@ -82,12 +80,12 @@ if not keyboard.getKeyDown(mouse_vjoy_toggle_key) and not mouse_vjoy_is_enabled 
 
 # Принудительное выключение мышеджоя
 if (keyboard.getPressed(mouse_vJoy_unenable_forced_key)):
-	mouse_vjoy_is_forced_unenabled = True
+	mouse_vjoy_is_forced_unenable = True
 	mouse_vjoy_is_enabled = False
 
 # Принудительное включение мышеджоя
-if (mouse_vjoy_is_forced_unenabled and keyboard.getPressed(mouse_vjoy_toggle_key)):
-	mouse_vjoy_is_forced_unenabled = False
+if (mouse_vjoy_is_forced_unenable and keyboard.getPressed(mouse_vjoy_toggle_key)):
+	mouse_vjoy_is_forced_unenable = False
 	mouse_vjoy_is_enabled = True
 	vJoy[0].rx = 0
 	vJoy[0].ry = 600
@@ -96,8 +94,8 @@ if (mouse_vjoy_is_forced_unenabled and keyboard.getPressed(mouse_vjoy_toggle_key
 		mouse_y
 	)
 
-# Центрирование курсора ползно для кликабильности при влюченом мышеджое центрируется мышеджой
-if (cursor_to_center_key):
+# Центрирование курсора полезно для кликабильности при включенном мышеджое центрируется мышеджой
+if (is_cursor_to_center_key_pressed):
 	windll.user32.SetCursorPos(SCREEN_X / 2, SCREEN_Y / 2)
 	if mouse_vjoy_is_enabled:
 		vJoy[0].x = 0
@@ -105,23 +103,31 @@ if (cursor_to_center_key):
 
 # Логика работы мышеджоя
 if mouse_vjoy_is_enabled: 
-	windll.user32.GetCursorPos(byref(PT))
-	if PT.x > 65536: mouse_x = 0 # добавлено, так как при выходе значения за пределы int, происходил вылет скрипта
-	else: mouse_x = PT.x
-	if PT.y > 65536: mouse_y = 0 # добавлено, так как при выходе значения за пределы int, происходил вылет скрипта
-	else: mouse_y = PT.y
+	windll.user32.GetCursorPos(byref(CURSOR))
+	mouse_x = CURSOR.x
+	mouse_y = CURSOR.y
+
+	# --- Блокировка выхода курсора за пределы мыше джоя (не имеет смысла если размер мыше джостика = размеру монитора) ---
+	# if (mouse_x < (SCREEN_X - MOUSE_JOY_WIDTH)/2):
+	# 	windll.user32.SetCursorPos((SCREEN_X - MOUSE_JOY_WIDTH)/2, mouse_y)
+	# if (mouse_x > SCREEN_X - ((SCREEN_X - MOUSE_JOY_WIDTH)/2)):
+	# 	windll.user32.SetCursorPos(SCREEN_X - ((SCREEN_X - MOUSE_JOY_WIDTH)/2), mouse_y)
+	# if (mouse_y < (SCREEN_Y - MOUSE_JOY_HEIGHT)/2):
+	# 	windll.user32.SetCursorPos(mouse_x, (SCREEN_Y - MOUSE_JOY_HEIGHT)/2)   
+	# if (mouse_y > SCREEN_Y - ((SCREEN_Y - MOUSE_JOY_HEIGHT)/2)):
+	# 	windll.user32.SetCursorPos(mouse_x, SCREEN_Y - ((SCREEN_Y - MOUSE_JOY_HEIGHT)/2))
 
 	if (not is_keyboard_joy_x_enabled):
-		vJoy[0].x = (mouse_x - (SCREEN_X / 2)) * MULTIPLER_X / QUALIFER * SCALE_V / SCALE_R 
+		vJoy[0].x = (mouse_x - (SCREEN_X / 2)) * MULTIPLE_X
 		saved_x_joy = vJoy[0].x
 	else:
-		saved_x_joy = (mouse_x - (SCREEN_X / 2)) * MULTIPLER_X / QUALIFER * SCALE_V / SCALE_R 
+		saved_x_joy = (mouse_x - (SCREEN_X / 2)) * MULTIPLE_X
 
 	if (not is_keyboard_joy_y_enabled):
-		vJoy[0].y = (mouse_y - (SCREEN_Y / 2)) * MULTIPLER_Y / QUALIFER * SCALE_V / SCALE_R
+		vJoy[0].y = (mouse_y - (SCREEN_Y / 2)) * MULTIPLE_Y
 		saved_y_joy = vJoy[0].y
 	else:
-		saved_y_joy = (mouse_y - (SCREEN_Y / 2)) * MULTIPLER_Y / QUALIFER * SCALE_V / SCALE_R
+		saved_y_joy = (mouse_y - (SCREEN_Y / 2)) * MULTIPLE_Y
 
 	# ЛКМ работает только при влюченом мышеджое, чтобы не было случайных выстрелов (если на ЛКМ назначена гашетка)
 	# если на ЛКМ гашетки нет можно выносить из блока if, для использовании ЛКМ без включения мышеджоя
@@ -136,7 +142,7 @@ else: vJoy[0].setButton(2, False)
 if mouse.getButton(3): vJoy[0].setButton(3, True)
 else: vJoy[0].setButton(3, False)
 if mouse.getButton(4): vJoy[0].setButton(4, True)
-else: vJoy[0].setButton(4, False)
+else: vJoy[0].setButton(4, False)   
 
 # Ось приближения
 vJoy[0].z += mouse.wheel * Z_SENS
@@ -192,7 +198,7 @@ if keyboard.getKeyDown(Key.Return):
 
 # Обзор с мышки
 if not mouse_vjoy_is_enabled: 
-	if not mouse_vjoy_is_forced_unenabled:
+	if not mouse_vjoy_is_forced_unenable:
 		vJoy[0].rx = vJoy[0].rx - mouse.deltaX * FAST_VIEW_SENS
 		vJoy[0].ry = vJoy[0].ry - mouse.deltaY * FAST_VIEW_SENS
 	else:
@@ -210,7 +216,6 @@ diagnostics.watch(mouse_vjoy_is_enabled)
 diagnostics.watch(vJoy[0].x)
 diagnostics.watch(vJoy[0].y)
 diagnostics.watch(SCREEN_X)
-diagnostics.watch(SCALE_V)
 diagnostics.watch(mouse.deltaX)
 diagnostics.watch(vJoy[0].z)
 diagnostics.watch(vJoy[0].rz)
