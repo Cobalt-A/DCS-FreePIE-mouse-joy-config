@@ -36,6 +36,14 @@ if starting:
 	Z_SENS = 11
 	SCREEN_X = windll.user32.GetSystemMetrics(0)
 	SCREEN_Y = windll.user32.GetSystemMetrics(1)
+	MOUSE_VJOY_TOGGLE_KEY = Key.C
+	MOUSE_VJOY_UNEBALE_FORCED_KEY = Key.Tab
+
+	# Управление джойстика с клавиатуры
+	MOUSE_VJOY_PITCH_DOWN = Key.LeftShift
+	MOUSE_VJOY_PITCH_UP = Key.LeftControl
+	MOUSE_VJOY_ROLL_LEFT = Key.A
+	MOUSE_VJOY_ROLL_RIGHT = Key.D
 	
 	# Размеры мышеджоя
 	MOUSE_JOY_WIDTH = SCREEN_X
@@ -65,9 +73,7 @@ if starting:
 	mouse_y = windll.user32.GetSystemMetrics(1)/2
 
 	mouse_vjoy_is_enabled = False
-	mouse_vjoy_toggle_key = Key.C
 	mouse_vjoy_is_forced_unenable = True
-	mouse_vJoy_unenable_forced_key = Key.Tab
 	is_keyboard_joy_x_enabled = False
 	is_keyboard_joy_y_enabled = False
 
@@ -75,11 +81,11 @@ if starting:
 cursor_to_center_key = mouse.middleButton
 
 # Кнопка обзора
-if keyboard.getKeyDown(mouse_vjoy_toggle_key) and mouse_vjoy_is_enabled and not mouse_vjoy_is_forced_unenable:
+if keyboard.getKeyDown(MOUSE_VJOY_TOGGLE_KEY) and mouse_vjoy_is_enabled and not mouse_vjoy_is_forced_unenable:
 	mouse_vjoy_is_enabled = False
 
 # Включение мышеджоя
-if not keyboard.getKeyDown(mouse_vjoy_toggle_key) and not mouse_vjoy_is_enabled and not mouse_vjoy_is_forced_unenable:
+if not keyboard.getKeyDown(MOUSE_VJOY_TOGGLE_KEY) and not mouse_vjoy_is_enabled and not mouse_vjoy_is_forced_unenable:
 	mouse_vjoy_is_enabled = True
 	vJoy[0].rx = 0
 	vJoy[0].ry = 1000
@@ -94,7 +100,7 @@ if (keyboard.getPressed(mouse_vJoy_unenable_forced_key)):
 	mouse_vjoy_is_enabled = False
 
 # Принудительное включение мышеджоя
-if (mouse_vjoy_is_forced_unenable and keyboard.getPressed(mouse_vjoy_toggle_key)):
+if (mouse_vjoy_is_forced_unenable and keyboard.getPressed(MOUSE_VJOY_TOGGLE_KEY)):
 	mouse_vjoy_is_forced_unenable = False
 	mouse_vjoy_is_enabled = True
 	vJoy[0].rx = 0
@@ -160,7 +166,7 @@ if vJoy[0].z > 18480: vJoy[0].z = 18480
 if vJoy[0].z < -17160: vJoy[0].z = -17160
 
 # Крен влево с клавиатуры
-if keyboard.getKeyDown(Key.A):
+if keyboard.getKeyDown(MOUSE_VJOY_ROLL_LEFT):
 	if (saved_x_joy - MAX_MOUSE_JOY_VALUE/2 > -MAX_MOUSE_JOY_VALUE/2):
 		max_increased_x_joy = saved_x_joy - MAX_MOUSE_JOY_VALUE/2
 	else:
@@ -176,7 +182,7 @@ if keyboard.getKeyDown(Key.A):
 		vJoy[0].x = max_increased_x_joy
 
 # Крен право с клавиатуры
-if keyboard.getKeyDown(Key.D):
+if keyboard.getKeyDown(MOUSE_VJOY_ROLL_RIGHT):
 	if (saved_x_joy + MAX_MOUSE_JOY_VALUE/2 < MAX_MOUSE_JOY_VALUE/2):
 		max_increased_x_joy = saved_x_joy + MAX_MOUSE_JOY_VALUE/2
 	else:
@@ -192,7 +198,7 @@ if keyboard.getKeyDown(Key.D):
 		vJoy[0].x = max_increased_x_joy
 
 # Тангаж вниз с клавиатуры
-if keyboard.getKeyDown(Key.LeftShift):
+if keyboard.getKeyDown(MOUSE_VJOY_PITCH_DOWN):
 	if (saved_y_joy - MAX_MOUSE_JOY_VALUE/2 > -MAX_MOUSE_JOY_VALUE/2):
 		max_increased_y_joy = saved_y_joy - MAX_MOUSE_JOY_VALUE/2
 	else:
@@ -208,7 +214,7 @@ if keyboard.getKeyDown(Key.LeftShift):
 		vJoy[0].y = max_increased_y_joy
 
 # Тангаж вверх с клавиатуры
-if keyboard.getKeyDown(Key.LeftControl):
+if keyboard.getKeyDown(MOUSE_VJOY_PITCH_UP):
 	if (saved_y_joy + MAX_MOUSE_JOY_VALUE/2 < MAX_MOUSE_JOY_VALUE/2):
 		max_increased_y_joy = saved_y_joy + MAX_MOUSE_JOY_VALUE/2
 	else:
@@ -224,12 +230,12 @@ if keyboard.getKeyDown(Key.LeftControl):
 		vJoy[0].y = max_increased_y_joy
 
 # Возврат положения крена джоя
-if (not keyboard.getKeyDown(Key.D) and not keyboard.getKeyDown(Key.A)) and is_keyboard_joy_x_enabled:
+if (not keyboard.getKeyDown(MOUSE_VJOY_ROLL_RIGHT) and not keyboard.getKeyDown(MOUSE_VJOY_ROLL_LEFT)) and is_keyboard_joy_x_enabled:
 	is_keyboard_joy_x_enabled = False
 	vJoy[0].x = saved_x_joy
 
 # Возврат положения тангажа джоя
-if (not keyboard.getKeyDown(Key.LeftControl) and not keyboard.getKeyDown(Key.LeftShift)) and is_keyboard_joy_y_enabled:
+if (not keyboard.getKeyDown(MOUSE_VJOY_PITCH_UP) and not keyboard.getKeyDown(MOUSE_VJOY_PITCH_DOWN)) and is_keyboard_joy_y_enabled:
 	is_keyboard_joy_y_enabled = False
 	vJoy[0].y = saved_y_joy
 
