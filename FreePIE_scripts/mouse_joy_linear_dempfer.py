@@ -95,7 +95,7 @@ if not keyboard.getKeyDown(MOUSE_VJOY_TOGGLE_KEY) and not mouse_vjoy_is_enabled 
 	)
 
 # Принудительное выключение мышеджоя
-if (keyboard.getPressed(mouse_vJoy_unenable_forced_key)):
+if (keyboard.getPressed(MOUSE_VJOY_UNEBALE_FORCED_KEY)):
 	mouse_vjoy_is_forced_unenable = True
 	mouse_vjoy_is_enabled = False
 
