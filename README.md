@@ -3,6 +3,7 @@
 Скрипт использует виртуальный джойстик [vJoy](https://github.com/jshafer817/vJoy/releases) и [OpenTrack](https://github.com/opentrack/opentrack/releases) для обзора
 
 # Настройка для vJoy
+
 Скрипт требует требует 2 включеных виртуальных джойстика VJoy
 vJoy[0] с включенными осями X, Y, Z, SLIDER и включенными кнопками скрипт по дефолту работает с 5
 vJoy[1] с включенными осями X, Y, Z, RX, RY
@@ -17,22 +18,24 @@ vJoy[1] с включенными осями X, Y, Z, RX, RY
 
 Либо можно в ручную выставить следующие настройки
 
-OpenTrack > Источник данных, выставить показанные оси, 2-го джостика VJoy
+###### OpenTrack > Источник данных, выставить показанные оси, 2-го джостика VJoy
+
 X > Joystick axis 2
 Y > Joystick axis 3
 Yaw > Joystick axis 5
 Pitch > Joystick axis 6
+
 ![Настройка OpenTrack](./images/Opentrack_2.png)
 
-OpenTrack > Настройки > Настройки выходного интерфейса
-Включить оси
+###### OpenTrack > Настройки > Настройки выходного интерфейса
+
+Выставить оси
 X > X
 Y > Y
 Yaw > Yaw
 Pitch > Pitch
 Остальные отключены
 
-Настроить центральное положение камеры ниже
 ![Настройка OpenTrack](./images/Opentrack_3.png)
 
 # Запуск скрипта в FreePIE
