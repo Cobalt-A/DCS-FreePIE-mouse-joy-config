@@ -5,8 +5,11 @@
 # Настройка для vJoy
 
 Скрипт требует 2 включенных виртуальных джойстика VJoy
+
 vJoy[0] с включенными осями X, Y, Z, SLIDER и включенными кнопками скрипт по дефолту работает с 5
+
 vJoy[1] с включенными осями X, Y, Z, RX, RY
+
 ![Настройка vJoy](./images/vJoy_1.png)
 ![Настройка vJoy](./images/vJoy_2.png)
 
@@ -21,8 +24,11 @@ vJoy[1] с включенными осями X, Y, Z, RX, RY
 ###### OpenTrack > Источник данных, выставить показанные оси, 2-го джостика vJoy
 
 X > Joystick axis 2
+
 Y > Joystick axis 3
+
 Yaw > Joystick axis 5
+
 Pitch > Joystick axis 6
 
 ![Настройка OpenTrack](./images/Opentrack_2.png)
@@ -30,10 +36,15 @@ Pitch > Joystick axis 6
 ###### OpenTrack > Настройки > Настройки выходного интерфейса
 
 Выставить оси
+
 X > X
+
 Y > Y
+
 Yaw > Yaw
+
 Pitch > Pitch
+
 Остальные отключены
 
 ![Настройка OpenTrack](./images/Opentrack_3.png)
