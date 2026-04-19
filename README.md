@@ -74,7 +74,7 @@ Pitch > Pitch
 
 # Возможные ошибки 
 
-"vJoy version of Driver (219) does NOT match DLL Version (218)", это значит что версия драйвера в FreePIE, не соответствует тому что в vJoy, исправляется путем копирования драйвера из C:\Program Files\vJoy\x86\vJoyInterface.dll и заменой его в C:\Program Files (x86)\FreePIE
+"vJoy version of Driver (219) does NOT match DLL Version (218)", это значит что версия драйвера в FreePIE, не соответствует тому что в vJoy, исправляется путем копирования драйвера из `C:\Program Files\vJoy\x86\vJoyInterface.dll` и заменой его в `C:\Program Files (x86)\FreePIE`
 
 Если не работает обзор 
 - проверьте в monitor vJoy отрабатывается ли изменение осей
