@@ -28,6 +28,7 @@
 # - Home - переключение блокировки клавиатурного ввода (мышеджой должен быть выключен)
 # - F10 - блокирует любой ввод, может быть разблокирован клавиатурный ввод клавишами: Home, F1
 # - F1 - разблокирует клавиатурный ввод в случаи если ввод был заблокирован клавишей F10
+# - RightShift - центрирование взгляда
 # - V - включает мышеджой, удержание кнопку включает обзор
 # - C - включает мышеджой и центрирует обзор на прицел, удержание кнопку включает обзор
 # - F - Центрирует взгляд по оси X
@@ -111,6 +112,9 @@ if starting:
 
     # Клавиша включения мышеджоя и обзора при удержании с сохранением камеры
     MOUSE_VJOY_UNEBALE_FORCED_BUTTON = Key.Tab
+    
+    # Клавиша центрирования взгляда
+    CENTER_VIEW_BUTTON = Key.RightShift
 
     # Клавиша центрирования взгляда
     MOUSE_VJOY_TOGGLE_SAVE_VIEW_BUTTON = Key.V
@@ -521,6 +525,11 @@ if not is_input_block and keyboard.getKeyDown(TRUST_UP_BUTTON):
 # Центрирование взгляда по оси x
 if keyboard.getKeyDown(CENTER_VIEW_X_BUTTON):
     vJoy[1].rx = 0
+    
+# Центрирование взгляда
+if keyboard.getKeyDown(CENTER_VIEW_BUTTON):
+    vJoy[1].rx = 0
+    vJoy[1].ry = 0
 
 # Обзор с мышки
 if is_mouse_view_enabled:
