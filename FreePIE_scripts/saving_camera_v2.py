@@ -191,12 +191,13 @@ if starting:
     is_keyboard_z_enabled = False
     is_keyboard_offset_x_active = False
 
-# Назначение кнопок мышеджоя
-for i in range(VJOY_NUMBER_BUTTONS - 1):
-    if mouse.getButton(i + 1):
-        vJoy[0].setButton(i + 1, True)
-    else:
-        vJoy[0].setButton(i + 1, False)
+# Назначение кнопок мышеджоя, не активны при выключеном мышеджое
+if not is_mouse_vjoy_unenable and not is_input_block:
+    for i in range(VJOY_NUMBER_BUTTONS):
+        if mouse.getButton(i):
+            vJoy[0].setButton(i, True)
+        else:
+            vJoy[0].setButton(i, False)
 
 # Кнопки обзора
 if keyboard.getKeyDown(VIEW_UP_BUTTON) and is_mouse_vjoy_active:
@@ -377,13 +378,6 @@ if is_mouse_vjoy_active:
 
     if not is_keyboard_joy_y_enabled:
         vJoy[0].y = new_y_value
-
-    # ЛКМ работает только при включенном мышеджое, чтобы не было случайных выстрелов (если на ЛКМ назначена гашетка)
-    # если на ЛКМ гашетки нет можно выносить из блока if, для использовании ЛКМ без включения мышеджоя
-    if mouse.leftButton:
-        vJoy[0].setButton(0, True)
-    else:
-        vJoy[0].setButton(0, False)
 
 # Ось приближения
 vJoy[1].z += mouse.wheel * Z_SENSITIVITY
