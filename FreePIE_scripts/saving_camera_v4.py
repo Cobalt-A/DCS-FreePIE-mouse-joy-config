@@ -51,20 +51,12 @@ if starting:
     class POINT(Structure):
         _fields_ = [("x", c_ulong), ("y", c_ulong)]
 
-    # Функция плавного изменения оси, если достигнут предел возвращает флаг = False
-    def change_axis(current_value, op, max_value, sensitivity):
-        new_value = current_value + sensitivity
-        if op(max_value, new_value):
-            return [new_value, True]
-        else:
-            return [max_value, False]
-
-    # Функция плавного возвращения оси в назначенное значение
-    def return_axis_to_value(current_value, target_value, sensitivity):
-        if current_value > target_value:
-            return change_axis(current_value, operator.lt, -target_value, -sensitivity)
-        else:
-            return change_axis(current_value, operator.gt, target_value, sensitivity)
+    # Функция линейного изменения оси, если достигнут предел возвращает флаг = True
+    def change_axis(current, target, step):
+        new_value = current + step if target > current else current - step
+        flag = abs(target - new_value) <= step
+        if (flag): return target, flag
+        return new_value, flag
 
     # Необходимые технические константы
     CURSOR = POINT()
@@ -203,30 +195,34 @@ if not is_mouse_vjoy_unenable and not is_input_block:
         else:
             vJoy[0].setButton(i, False)
 
-# Кнопки обзора
+# Кнопка фиксированного обзора вверх
 if keyboard.getKeyDown(VIEW_UP_BUTTON) and is_mouse_vjoy_active:
     is_keyboard_y_view_active = True
     vJoy[1].ry = 4000
     if not is_keyboard_x_view_active:
         vJoy[1].rx = 0
 
+# Кнопка фиксированного обзора назад
 if keyboard.getKeyDown(VIEW_BACK_BUTTON) and is_mouse_vjoy_active:
     is_keyboard_x_view_active = True
     vJoy[1].rx = 15000
 
+# Кнопка фиксированного обзора влево
 if keyboard.getKeyDown(VIEW_LEFT_BUTTON) and is_mouse_vjoy_active:
     is_keyboard_x_view_active = True
     vJoy[1].rx = 6400
 
+# Кнопка фиксированного обзора вправо
 if keyboard.getKeyDown(VIEW_RIGHT_BUTTON) and is_mouse_vjoy_active:
     is_keyboard_x_view_active = True
     vJoy[1].rx = -6400
 
+# Кнопка фиксированного обзора вниз
 if keyboard.getKeyDown(VIEW_DOWN_BUTTON) and is_mouse_vjoy_active:
     is_keyboard_y_view_active = True
     vJoy[1].ry = -1500
 
-# Возврат обзора
+# Возврат обзора по X после фиксированного обзора
 if (
     is_keyboard_x_view_active
     and not (
@@ -240,6 +236,7 @@ if (
     vJoy[1].ry = 0
     vJoy[1].rx = 0
 
+# Возврат обзора по Y после фиксированного обзора
 if (
     is_keyboard_y_view_active
     and not (
@@ -251,36 +248,37 @@ if (
     vJoy[1].ry = 0
     vJoy[1].rx = 0
 
-# Кнопки смещения обзора
+# Кнопка смещения по кабине вниз
 if keyboard.getKeyDown(VIEW_OFFSET_DOWN_BUTTON):
-    [new_value, flag] = change_axis(
+    new_value, flag = change_axis(
         vJoy[1].y,
-        operator.lt,
         -MAX_NEGATIVE_Y_VIEW_OFFSET_VALUE,
-        -CHANGE_Y_VIEW_SENSITIVITY,
+        CHANGE_Y_VIEW_SENSITIVITY,
     )
     vJoy[1].y = new_value
 
+# Кнопка смещения по кабине вверх
 if keyboard.getKeyDown(VIEW_OFFSET_UP_BUTTON):
-    [new_value, flag] = change_axis(
+    new_value, flag = change_axis(
         vJoy[1].y,
-        operator.gt,
         MAX_POSITIVE_Y_VIEW_OFFSET_VALUE,
         CHANGE_Y_VIEW_SENSITIVITY,
     )
     vJoy[1].y = new_value
 
+# Кнопка смещения по кабине влево
 if keyboard.getKeyDown(VIEW_OFFSET_LEFT_BUTTON):
-    [new_value, flag] = change_axis(
-        vJoy[1].x, operator.gt, MAX_X_VIEW_OFFSET_VALUE, CHANGE_X_VIEW_SENSITIVITY
+    new_value, flag = change_axis(
+        vJoy[1].x, MAX_X_VIEW_OFFSET_VALUE, CHANGE_X_VIEW_SENSITIVITY
     )
     vJoy[1].x = new_value
     if not is_keyboard_offset_x_active:
         is_keyboard_offset_x_active = True
 
+# Кнопка смещения по кабине вправо
 if keyboard.getKeyDown(VIEW_OFFSET_RIGHT_BUTTON):
-    [new_value, flag] = change_axis(
-        vJoy[1].x, operator.lt, -MAX_X_VIEW_OFFSET_VALUE, -CHANGE_X_VIEW_SENSITIVITY
+    new_value, flag = change_axis(
+        vJoy[1].x, -MAX_X_VIEW_OFFSET_VALUE, CHANGE_X_VIEW_SENSITIVITY
     )
     vJoy[1].x = new_value
     if not is_keyboard_offset_x_active:
@@ -292,48 +290,9 @@ if (
     and not keyboard.getKeyDown(VIEW_OFFSET_LEFT_BUTTON)
     and is_keyboard_offset_x_active
 ):
-    [new_value, flag] = return_axis_to_value(vJoy[1].x, 0, CHANGE_X_VIEW_SENSITIVITY)
+    new_value, flag = change_axis(vJoy[1].x, 0, CHANGE_X_VIEW_SENSITIVITY)
     vJoy[1].x = new_value
     is_keyboard_offset_x_active = flag
-
-
-#
-# Включение обзора при включенном мышеджое
-# if is_mouse_vjoy_active and keyboard.getKeyDown(MOUSE_VJOY_TOGGLE_BUTTON) and not is_mouse_vjoy_unenable:
-#     is_mouse_view_enabled = True
-#     is_mouse_vjoy_active = False
-#     if is_keyboard_x_view_active:
-#         is_keyboard_x_view_active = False
-#     if is_keyboard_y_view_active:
-#         is_keyboard_y_view_active = False
-
-# # Выключение обзора при включенном мышеджое
-# if not is_mouse_vjoy_active and keyboard.getKeyUp(MOUSE_VJOY_TOGGLE_BUTTON) and not is_mouse_vjoy_unenable:
-#     is_mouse_view_enabled = False
-#     is_mouse_vjoy_active = True
-#     vJoy[1].rx = 0
-#     vJoy[1].ry = 0
-#     windll.user32.SetCursorPos(mouse_vjoy_x, mouse_vjoy_y)
-
-# # Включение/Выключение мышеджоя
-# if keyboard.getPressed(MOUSE_VJOY_UNEBALE_FORCED_BUTTON):
-#     is_mouse_vjoy_unenable = not is_mouse_vjoy_unenable
-#     if is_mouse_vjoy_unenable:
-#         is_mouse_vjoy_active = False
-#     else:
-#         is_mouse_view_enabled = False
-#         is_mouse_vjoy_active = True
-#         vJoy[1].rx = 0
-#         vJoy[1].ry = 0
-#         windll.user32.SetCursorPos(mouse_vjoy_x, mouse_vjoy_y)
-
-# # Включение обзора при выключенном джое
-# if keyboard.getKeyDown(MOUSE_VJOY_TOGGLE_BUTTON) and is_mouse_vjoy_unenable:
-#     is_mouse_view_enabled = True
-
-# # Выключение обзора при выключенном джое
-# if keyboard.getKeyUp(MOUSE_VJOY_TOGGLE_BUTTON) and is_mouse_vjoy_unenable:
-#     is_mouse_view_enabled = False
 
 # Кнопка обзора
 if (
@@ -405,15 +364,17 @@ if mouse.middleButton:
         vJoy[0].x = 0
         vJoy[0].y = 0
 
-# Блокировка ввода
+# Переключение блокировки ввода
 if is_mouse_vjoy_unenable and keyboard.getPressed(BLOCK_INPUT_BUTTON):
     is_input_block = not is_input_block
 
+# Блокировка ввода по карте
 if keyboard.getPressed(BLOCK_MAP_INPUT_BUTTON) and not is_input_block:
     is_mouse_vjoy_unenable = True
     is_input_block = True
     is_input_block_by_map = True
 
+# Разблокировка ввода по карте
 if keyboard.getPressed(UNBLOCK_MAP_INPUT_BUTTON) and is_input_block_by_map:
     is_mouse_vjoy_unenable = True
     is_input_block = False
@@ -454,8 +415,8 @@ if vJoy[1].z <= -MAX_VJOY_VALUE:
 
 # Крен влево с клавиатуры
 if not is_input_block and keyboard.getKeyDown(ROLL_LEFT_BUTTON):
-    [new_value, flag] = change_axis(
-        vJoy[0].x, operator.lt, -MAX_KEYBOARD_ROLL_VALUE, -KEYBOARD_ROLL_SENSITIVITY
+    new_value, flag = change_axis(
+        vJoy[0].x, -MAX_KEYBOARD_ROLL_VALUE, KEYBOARD_ROLL_SENSITIVITY
     )
     vJoy[0].x = new_value
     if not is_keyboard_joy_x_enabled:
@@ -463,7 +424,7 @@ if not is_input_block and keyboard.getKeyDown(ROLL_LEFT_BUTTON):
 
 # Крен право с клавиатуры
 if not is_input_block and keyboard.getKeyDown(ROLL_RIGHT_BUTTON):
-    [new_value, flag] = change_axis(
+    new_value, flag = change_axis(
         vJoy[0].x, operator.gt, MAX_KEYBOARD_ROLL_VALUE, KEYBOARD_ROLL_SENSITIVITY
     )
     vJoy[0].x = new_value
@@ -472,8 +433,8 @@ if not is_input_block and keyboard.getKeyDown(ROLL_RIGHT_BUTTON):
 
 # Тангаж вниз с клавиатуры
 if not is_input_block and keyboard.getKeyDown(PITCH_DOWN_BUTTON):
-    [new_value, flag] = change_axis(
-        vJoy[0].y, operator.lt, -MAX_KEYBOARD_PITCH_VALUE, -KEYBOARD_PITCH_SENSITIVITY
+    new_value, flag = change_axis(
+        vJoy[0].y, -MAX_KEYBOARD_PITCH_VALUE, KEYBOARD_PITCH_SENSITIVITY
     )
     vJoy[0].y = new_value
     if not is_keyboard_joy_y_enabled:
@@ -481,7 +442,7 @@ if not is_input_block and keyboard.getKeyDown(PITCH_DOWN_BUTTON):
 
 # Тангаж вверх с клавиатуры
 if not is_input_block and keyboard.getKeyDown(PITCH_UP_BUTTON):
-    [new_value, flag] = change_axis(
+    new_value, flag = change_axis(
         vJoy[0].y, operator.gt, MAX_KEYBOARD_PITCH_VALUE, KEYBOARD_PITCH_SENSITIVITY
     )
     vJoy[0].y = new_value
@@ -494,7 +455,7 @@ if (
     and not keyboard.getKeyDown(ROLL_LEFT_BUTTON)
     and is_keyboard_joy_x_enabled
 ):
-    [new_value, flag] = return_axis_to_value(
+    new_value, flag = change_axis(
         vJoy[0].x, saved_x_joy, KEYBOARD_ROLL_SENSITIVITY
     )
     vJoy[0].x = new_value
@@ -506,7 +467,7 @@ if (
     and not keyboard.getKeyDown(PITCH_DOWN_BUTTON)
     and is_keyboard_joy_y_enabled
 ):
-    [new_value, flag] = return_axis_to_value(
+    new_value, flag = change_axis(
         vJoy[0].y, saved_y_joy, KEYBOARD_PITCH_SENSITIVITY
     )
     vJoy[0].y = new_value
@@ -514,7 +475,7 @@ if (
 
 # Рысканье вправо
 if not is_input_block and keyboard.getKeyDown(YAW_UP_BUTTON):
-    [new_value, flag] = change_axis(
+    new_value, flag = change_axis(
         vJoy[0].z, operator.gt, MAX_VJOY_VALUE, KEYBOARD_YAW_SENSITIVITY
     )
     vJoy[0].z = new_value
@@ -523,8 +484,8 @@ if not is_input_block and keyboard.getKeyDown(YAW_UP_BUTTON):
 
 # Рысканье влево
 if not is_input_block and keyboard.getKeyDown(YAW_DOWN_BUTTON):
-    [new_value, flag] = change_axis(
-        vJoy[0].z, operator.lt, -MAX_VJOY_VALUE, -KEYBOARD_YAW_SENSITIVITY
+    new_value, flag = change_axis(
+        vJoy[0].z, -MAX_VJOY_VALUE, KEYBOARD_YAW_SENSITIVITY
     )
     vJoy[0].z = new_value
     if not is_keyboard_z_enabled:
@@ -536,21 +497,21 @@ if (
     and not keyboard.getKeyDown(YAW_UP_BUTTON)
     and is_keyboard_z_enabled
 ):
-    [new_value, flag] = return_axis_to_value(vJoy[0].z, 0, KEYBOARD_YAW_SENSITIVITY)
+    new_value, flag = change_axis(vJoy[0].z, 0, KEYBOARD_YAW_SENSITIVITY)
     vJoy[0].z = new_value
     is_keyboard_z_enabled = flag
 
 # Тяга вверх
 if not is_input_block and keyboard.getKeyDown(TRUST_DOWN_BUTTON):
-    [new_value, flag] = change_axis(
+    new_value, flag = change_axis(
         vJoy[0].slider, operator.gt, MAX_VJOY_VALUE, CHANGE_TRUST_SENSITIVITY
     )
     vJoy[0].slider = new_value
 
 # Тяга вниз
 if not is_input_block and keyboard.getKeyDown(TRUST_UP_BUTTON):
-    [new_value, flag] = change_axis(
-        vJoy[0].slider, operator.lt, -MAX_VJOY_VALUE, -CHANGE_TRUST_SENSITIVITY
+    new_value, flag = change_axis(
+        vJoy[0].slider, -MAX_VJOY_VALUE, CHANGE_TRUST_SENSITIVITY
     )
     vJoy[0].slider = new_value
 
@@ -568,7 +529,7 @@ if is_mouse_view_enabled:
     vJoy[1].rx = vJoy[1].rx - mouse.deltaX * FAST_VIEW_SENSITIVITY
     vJoy[1].ry = vJoy[1].ry - mouse.deltaY * FAST_VIEW_SENSITIVITY
 
-# диагностические значения
+# Диагностические значения
 diagnostics.watch(is_mouse_vjoy_active)
 diagnostics.watch(is_mouse_vjoy_active_save_view)
 diagnostics.watch(is_mouse_view_enabled)
